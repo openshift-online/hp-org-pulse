@@ -5,8 +5,8 @@
 
 ARG CORE_TAG=latest
 
-# Stage 1: Build with all AI Eng modules
-FROM quay.io/org-pulse/org-pulse-core-frontend-builder:v2.0.82 AS build
+# Stage 1: Build with all HP Eng modules
+FROM quay.io/org-pulse/org-pulse-core-frontend-builder:v2.0.83 AS build
 
 # Add platform customizations
 COPY platform/ ./platform/
@@ -17,6 +17,6 @@ COPY modules/ ./modules/
 RUN npm run build
 
 # Stage 2: Serve with hardened nginx
-FROM quay.io/org-pulse/org-pulse-core-frontend-runtime:v2.0.82
+FROM quay.io/org-pulse/org-pulse-core-frontend-runtime:v2.0.83
 
 COPY --from=build /app/dist /usr/share/nginx/html
