@@ -152,7 +152,7 @@ Platform-level configuration for the site. Created when an admin saves settings 
 
 ```json
 {
-  "titlePrefix": "AI Engineering",
+  "titlePrefix": "HP Engineering",
   "authEmailDomain": "cluster.local"
 }
 ```
@@ -792,6 +792,7 @@ Admin-managed list of external tool launchers. Array of tool objects.
 ```
 
 **Fields:**
+
 - `id` (string, auto-generated): Unique identifier in format `tool_<timestamp>_<randomstring>` or custom ID on creation.
 - `title` (string, required): Display name of the tool.
 - `description` (string, required): Short description of what the tool does.
@@ -800,6 +801,7 @@ Admin-managed list of external tool launchers. Array of tool objects.
 - `order` (integer, optional): Display order in the grid. Tools are sorted by this field (ascending). Default 0 on creation; auto-assigned to next available order if omitted on POST.
 
 **Notes:**
+
 - Created/updated via `POST /api/modules/agentic-tools/tools` and `PATCH /api/modules/agentic-tools/tools/:id` (admin-gated).
 - Deleted via `DELETE /api/modules/agentic-tools/tools/:id` (admin-gated).
 - Reordering is handled by updating the `order` field on affected tools via PATCH.

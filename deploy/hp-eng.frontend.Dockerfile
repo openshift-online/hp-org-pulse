@@ -1,9 +1,7 @@
-# Org Pulse — AI Engineering Frontend
+# Org Pulse — HP Engineering Frontend
 #
-# Extends the core frontend builder with AI Eng modules, builds, then
+# Extends the core frontend builder with HP Eng modules, builds, then
 # serves from the core runtime image.
-
-ARG CORE_TAG=latest
 
 # Stage 1: Build with all HP Eng modules
 FROM quay.io/org-pulse/org-pulse-core-frontend-builder:v2.0.83 AS build
