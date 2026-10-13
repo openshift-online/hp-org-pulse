@@ -1,0 +1,13 @@
+{
+  "name": "Agentic Presubmit Decision",
+  "slug": "agentic-presubmits",
+  "description": "CHAI presubmit agent decision performance, hosted in Grafana",
+  "icon": "Activity",
+  "order": 13,
+  "client": {
+    "entry": "./client/index.js",
+    "navItems": [
+      { "id": "main", "label": "Agentic Presubmit Decision", "icon": "Activity", "default": true }
+    ]
+  }
+}

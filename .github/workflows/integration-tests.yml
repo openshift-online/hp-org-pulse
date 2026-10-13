@@ -39,6 +39,11 @@ jobs:
               - 'tests/integration/helpers.js'
               - 'modules/agentic-tools/**'
               - 'tests/integration/agentic-tools.spec.js'
+            agentic-presubmits:
+              - 'tests/integration/constants.js'
+              - 'tests/integration/helpers.js'
+              - 'modules/agentic-presubmits/**'
+              - 'tests/integration/agentic-presubmits.spec.js'
             cve-triage:
               - 'tests/integration/constants.js'
               - 'tests/integration/helpers.js'

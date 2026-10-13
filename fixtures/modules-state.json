@@ -3,5 +3,6 @@
   "team-tracker": true,
   "backport-tracker": true,
   "cve-triage": true,
-  "jira-solve-agent": true
+  "jira-solve-agent": true,
+  "agentic-presubmits": true
 }
