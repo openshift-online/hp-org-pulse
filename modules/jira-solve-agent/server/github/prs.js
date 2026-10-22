@@ -1,6 +1,7 @@
 /**
  * Fetch pull requests opened by the Jira Solve Agent bot (redhat-chai-bot)
- * across the OpenShift repositories wired up to the periodic agent jobs.
+ * across the repositories wired up to the periodic agent jobs (mostly
+ * openshift/, plus other orgs teams track explicitly, e.g. migtools/).
  *
  * The GitHub GraphQL `search` API is used with a per-repo `author:` filter so
  * we count every PR the bot has ever opened (all states). Each PR's leading
@@ -62,6 +63,10 @@ const TEAM_REPOS = {
     'cluster-authentication-operator',
     'ocp-release-operator-sdk'
   ],
+  // Source of truth for OADP's repo set: oadp-rebasebot/oadp-rebase repos.yaml
+  // (branch oadp-dev), plus the oadp-rebasebot org itself (rebase tooling).
+  // Bare names live under the openshift/ org; migtools/ and oadp-rebasebot/
+  // entries carry their org because the team spans multiple organizations.
   oadp: [
     'oadp-operator',
     'velero',
@@ -69,8 +74,22 @@ const TEAM_REPOS = {
     'velero-plugin-for-gcp',
     'velero-plugin-for-microsoft-azure',
     'velero-plugin-for-legacy-aws',
+    'velero-plugin-for-csi',
     'openshift-velero-plugin',
-    'oadp-must-gather'
+    'oadp-must-gather',
+    'restic',
+    'hypershift-oadp-plugin',
+    'migtools/kopia',
+    'migtools/filebrowser',
+    'migtools/udistribution',
+    'migtools/oadp-vmdp',
+    'migtools/kubevirt-velero-plugin',
+    'migtools/oadp-non-admin',
+    'migtools/kubevirt-datamover-controller',
+    'migtools/kubevirt-datamover-plugin',
+    'migtools/oadp-vm-file-restore',
+    'migtools/oadp-cli',
+    'oadp-rebasebot/oadp-rebase'
   ],
   networking: ['ovn-kubernetes', 'cluster-network-operator', 'multus-cni', 'ptp-operator'],
   etcd: ['etcd', 'cluster-etcd-operator'],
