@@ -9,7 +9,8 @@ const PROJECTS = [
   'OKD',                                             // OKD
   'MULTIARCH',                                       // Multi Architecture
   'METAL',                                           // Metal Platform
-  'SPLAT', 'OPCT'                                    // SPLAT
+  'SPLAT', 'OPCT',                                   // SPLAT
+  'OADP'                                             // OADP & Backup
 ];
 const AGENT_LABEL = 'issue-for-agent';
 const PROCESSED_LABEL = 'agent-processed';

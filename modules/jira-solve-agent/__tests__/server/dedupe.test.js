@@ -181,4 +181,17 @@ describe('fetchAgentData', () => {
     expect(requestedJql).toContain('labels != "chai-backport"')
     expect(requestedJql).toContain('"ROSAENG"')
   })
+
+  it('includes the OADP project in the tracked project set', async () => {
+    let requestedJql = ''
+    const jiraRequest = async (path) => {
+      requestedJql = new URL('https://x' + path).searchParams.get('jql')
+      return { issues: [], isLast: true }
+    }
+
+    await fetchAgentData(jiraRequest)
+
+    expect(requestedJql).toContain('project IN (')
+    expect(requestedJql).toContain('"OADP"')
+  })
 })
