@@ -25,10 +25,15 @@ describe('REPO_TEAMS', () => {
     expect(new Set(AGENT_REPOS).size).toBe(AGENT_REPOS.length)
   })
 
-  it('fully qualifies every repo under its GitHub org', () => {
+  it('fully qualifies every repo as owner/name', () => {
     for (const { repo } of REPO_TEAMS) {
-      expect(repo).toMatch(/^openshift(?:-online)?\/[a-z0-9][a-z0-9._-]*$/)
+      expect(repo).toMatch(/^[a-z0-9][a-z0-9-]*\/[a-z0-9][a-z0-9._-]*$/)
     }
+  })
+
+  it('expands bare names under openshift/ and keeps explicit orgs verbatim', () => {
+    expect(REPO_TEAM_BY_NAME['openshift/velero']).toBe('oadp')
+    expect(REPO_TEAM_BY_NAME['migtools/kopia']).toBe('oadp')
   })
 
   it('maps every repo back to its team', () => {
@@ -63,6 +68,29 @@ describe('REPO_TEAMS', () => {
       expect(AGENT_REPOS).toContain(repo)
       expect(REPO_TEAM_BY_NAME[repo]).toBe('rosa-services')
     }
+  })
+
+  it('tracks every OADP repo from the rebase bot repos.yaml plus the rebasebot org', () => {
+    // Mirrors oadp-rebasebot/oadp-rebase repos.yaml (branch oadp-dev) and the
+    // oadp-rebasebot org's own repos (rebase tooling).
+    for (const repo of [
+      'openshift/oadp-operator', 'openshift/velero',
+      'openshift/velero-plugin-for-aws', 'openshift/velero-plugin-for-gcp',
+      'openshift/velero-plugin-for-microsoft-azure',
+      'openshift/velero-plugin-for-legacy-aws',
+      'openshift/velero-plugin-for-csi', 'openshift/openshift-velero-plugin',
+      'openshift/oadp-must-gather', 'openshift/restic',
+      'openshift/hypershift-oadp-plugin',
+      'migtools/kopia', 'migtools/filebrowser', 'migtools/udistribution',
+      'migtools/oadp-vmdp', 'migtools/kubevirt-velero-plugin',
+      'migtools/oadp-non-admin', 'migtools/kubevirt-datamover-controller',
+      'migtools/kubevirt-datamover-plugin', 'migtools/oadp-vm-file-restore',
+      'migtools/oadp-cli',
+      'oadp-rebasebot/oadp-rebase'
+    ]) {
+      expect(REPO_TEAM_BY_NAME[repo]).toBe('oadp')
+    }
+    expect(TEAM_REPOS.oadp).toHaveLength(22)
   })
 
   it('wires Edge & Ecosystem repos to edge-ecosystem', () => {
