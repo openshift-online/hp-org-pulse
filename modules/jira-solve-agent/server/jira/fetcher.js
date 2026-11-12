@@ -4,7 +4,7 @@ const PROJECTS = [
   'OCPBUGS', 'CNTRLPLANE', 'TRT', 'WINC', 'MCO', 'NE', 'ROSAENG',
   // Edge & Ecosystem pillar — derived from gitlab.cee.redhat.com/hybrid-platforms/org
   'OCPEDGE', 'USHIFT',                              // Edge
-  'OAPE', 'SSCSI', 'SPIRE', 'ESO',                  // Application Platform (OAP)
+  'OAPE', 'CM', 'SPIRE', 'SSCSI', 'ESO', 'MG', 'SMC', // OAPE — OpenShift Application Platform
   'CLID',                                            // CID
   'OKD',                                             // OKD
   'MULTIARCH',                                       // Multi Architecture

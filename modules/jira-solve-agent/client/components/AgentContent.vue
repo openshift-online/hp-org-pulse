@@ -276,14 +276,24 @@ const TEAMS = [
   { key: 'monitoring', label: 'Monitoring', components: ['Monitoring', 'Telemeter', 'monitoring-uiplugin'], projectPrefixes: [] },
   { key: 'builds', label: 'Builds', components: ['Build', 'openshift-controller-manager / build'], projectPrefixes: [] },
   {
+    key: 'oape',
+    label: 'OAPE',
+    projectPrefixes: ['OAPE', 'CM', 'SPIRE', 'SSCSI', 'ESO', 'MG', 'SMC'],
+    componentProjectPrefix: 'OCPBUGS',
+    components: [
+      'Operator SDK', 'operator sdk', 'cert-manager',
+      'external-secrets-operator', 'External Secrets Operator',
+      'zero-trust-workload-identity-manager', 'must-gather',
+      'Secrets Store CSI driver'
+    ]
+  },
+  {
     key: 'edge-ecosystem',
     label: 'Edge & Ecosystem',
-    // Derived from gitlab.cee.redhat.com/hybrid-platforms/org — all nested teams
-    // under the Edge & Ecosystem pillar (Edge, OAP, CID, OKD, MultiArch, Metal
-    // Platform, IBM System Enablement, SPLAT).
+    // Derived from gitlab.cee.redhat.com/hybrid-platforms/org:
+    // Edge, CID, OKD, MultiArch, Metal Platform, IBM System Enablement, SPLAT.
     projectPrefixes: [
       'OCPEDGE', 'USHIFT',                          // Edge
-      'OAPE', 'SSCSI', 'SPIRE', 'ESO',              // Application Platform (OAP)
       'CLID',                                        // CID
       'OKD',                                         // OKD
       'MULTIARCH',                                   // Multi Architecture
@@ -296,8 +306,6 @@ const TEAMS = [
       'Two Node Fencing', 'Two Node with Arbiter',
       'Logical Volume Manager Storage',
       'Topology Transitions',
-      // Application Platform (OAP)
-      'cert-manager', 'external-secrets-operator', 'secrets-store-csi-driver',
       // CID
       'oc-mirror', 'mirror-gui',
       // Multi Architecture + IBM System Enablement
@@ -386,7 +394,9 @@ function issueMatchesTeam(issue, team) {
   if (prefixes.some(prefix => issue.key.startsWith(prefix + '-'))) {
     return true;
   }
-  if (team.components?.length && issue.components.some(c => team.components.includes(c))) {
+  const componentProjectMatches = !team.componentProjectPrefix ||
+    issue.key.startsWith(team.componentProjectPrefix + '-');
+  if (componentProjectMatches && team.components?.length && issue.components.some(c => team.components.includes(c))) {
     return true;
   }
   return false;
