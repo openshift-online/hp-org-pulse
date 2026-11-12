@@ -83,6 +83,56 @@ test.describe('Jira Solve Agent Module @jira-solve-agent', () => {
     expect(page.errors).toHaveLength(0)
   })
 
+  test('filters OAPE projects, OCPBUGS components, and bot PRs', async ({ page }) => {
+    await page.goto('/#/jira-solve-agent/main')
+    await page.waitForLoadState('networkidle')
+
+    const oape = page.getByRole('button', { name: /^OAPE/ })
+    await expect(oape).toBeVisible()
+    await oape.hover()
+    const tooltip = oape.getByRole('tooltip')
+    await expect(tooltip).toContainText('26 repos')
+    for (const repo of [
+      'must-gather', 'cert-manager-approver-policy', 'external-secrets-bitwarden-sdk-server',
+      'intelliaide-lightspeed-skills', 'ocp-release-operator-sdk', 'ansible-operator-plugins',
+      'secrets-store-csi-driver', 'must-gather-clean',
+      'zero-trust-workload-identity-manager', 'spiffe-go-spiffe', 'ocp-secrets-management-console'
+    ]) {
+      await expect(tooltip).toContainText(repo)
+    }
+    await oape.click()
+
+    const jiraKeys = [
+      'OAPE-42', 'CM-42', 'SPIRE-42', 'SSCSI-42', 'ESO-42', 'MG-42', 'SMC-42',
+      'OCPBUGS-60003', 'OCPBUGS-60004', 'TRT-1003'
+    ]
+    for (const key of jiraKeys) {
+      await expect(page.getByRole('link', { name: key, exact: true })).toBeVisible()
+    }
+    await expect(page.getByRole('link', { name: 'must-gather#9010', exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'must-gather-clean#9011', exact: true })).toBeVisible()
+    await expect(page.locator('tbody tr')).toHaveCount(11)
+    await expect(page.getByRole('link', { name: 'TRT-1001', exact: true })).toHaveCount(0)
+
+    await page.getByRole('button', { name: /^Edge & Ecosystem/ }).click()
+    for (const key of jiraKeys) {
+      await expect(page.getByRole('link', { name: key, exact: true })).toHaveCount(0)
+    }
+    await expect(page.getByRole('link', { name: 'must-gather-clean#9011', exact: true })).toHaveCount(0)
+
+    // A bot PR in must-gather belongs to OAPE even with a TRT Jira key.
+    await page.getByRole('button', { name: /^TRT/ }).click()
+    await expect(page.getByRole('link', { name: 'TRT-1001', exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'TRT-1003', exact: true })).toHaveCount(0)
+    await page.getByRole('button', { name: /^Support & Diagnostics/ }).click()
+    await expect(page.getByRole('link', { name: 'must-gather#9010', exact: true })).toHaveCount(0)
+
+    await page.getByRole('button', { name: /^All Teams/ }).click()
+    await expect(page.locator('tbody tr')).toHaveCount(17)
+    await expect(page.getByRole('link', { name: 'CM-42', exact: true })).toHaveCount(1)
+    expect(page.errors).toHaveLength(0)
+  })
+
   test('offers Monitoring as a team filter with its repos', async ({ page }) => {
     await page.goto('/#/jira-solve-agent/main')
     await page.waitForLoadState('networkidle')

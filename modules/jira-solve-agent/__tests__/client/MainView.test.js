@@ -239,6 +239,69 @@ describe('AgentContent', () => {
     expect(wrapper.text()).not.toContain('HyperShift bug')
   })
 
+  describe('OAPE team', () => {
+    async function selectTeam(wrapper, label) {
+      const button = wrapper.findAll('button').find(b => b.text().startsWith(label))
+      await button.trigger('click')
+      return button
+    }
+
+    it.each(['OAPE', 'CM', 'SPIRE', 'SSCSI', 'ESO', 'MG', 'SMC'])(
+      'includes %s project issues in OAPE', async (project) => {
+        const issue = { key: `${project}-42`, summary: 'OAPE project issue', components: [], agentState: 'new' }
+        const wrapper = mount(AgentContent, {
+          props: { agentData: { ...sampleData, issues: [...sampleData.issues, issue] } }
+        })
+        const button = await selectTeam(wrapper, 'OAPE')
+        expect(renderedKeys(wrapper)).toEqual([issue.key])
+        expect(button.findAll('.text-xl').map(n => n.text())).toEqual(['1', '0', '0', '—'])
+
+        await selectTeam(wrapper, 'Edge & Ecosystem')
+        expect(renderedKeys(wrapper)).not.toContain(issue.key)
+        expect(renderedKeys(wrapper)).toContain('OCPEDGE-20')
+      }
+    )
+
+    it.each([
+      'Operator SDK', 'operator sdk', 'cert-manager',
+      'external-secrets-operator', 'External Secrets Operator',
+      'zero-trust-workload-identity-manager', 'must-gather', 'Secrets Store CSI driver'
+    ])('matches the %s component only in OCPBUGS', async (component) => {
+      const issues = [
+        { key: 'OCPBUGS-200', summary: 'OAPE component issue', components: [component] },
+        { key: 'TRT-200', summary: 'Same component in another project', components: [component] },
+        { key: 'OCPBUGS-201', summary: 'Different component', components: [`Documentation / ${component}`] }
+      ]
+      const wrapper = mount(AgentContent, {
+        props: { agentData: { ...sampleData, issues } }
+      })
+      await selectTeam(wrapper, 'OAPE')
+      expect(renderedKeys(wrapper)).toEqual(['OCPBUGS-200'])
+      await selectTeam(wrapper, 'Edge & Ecosystem')
+      expect(wrapper.text()).toContain('No issues match your filters.')
+    })
+
+    it('uses repository ownership for bot PR rows even when Jira points to another team', async () => {
+      const issues = [
+        { key: 'TRT-200', summary: 'OAPE repository fix', components: [], team: 'oape', agentState: 'in-progress',
+          prUrl: 'https://github.com/openshift/must-gather/pull/9010', prState: 'MERGED' },
+        { key: 'NO-JIRA', summary: 'OAPE cleanup update', components: [], team: 'oape', agentState: 'in-progress',
+          prUrl: 'https://github.com/openshift/must-gather-clean/pull/9011', prState: 'OPEN' },
+        { key: 'OAPE-200', summary: 'Storage repository fix', components: ['cert-manager'], team: 'storage' }
+      ]
+      const wrapper = mount(AgentContent, {
+        props: { agentData: { ...sampleData, issues } }
+      })
+      const button = await selectTeam(wrapper, 'OAPE')
+      expect(renderedKeys(wrapper)).toEqual(['TRT-200', 'NO-JIRA'])
+      expect(button.findAll('.text-xl').map(n => n.text())).toEqual(['2', '2', '1', '50%'])
+      await selectTeam(wrapper, 'TRT')
+      expect(wrapper.text()).toContain('No issues match your filters.')
+      await selectTeam(wrapper, 'Storage')
+      expect(renderedKeys(wrapper)).toEqual(['OAPE-200'])
+    })
+  })
+
   it('filters TRT issues by project prefix', async () => {
     const wrapper = mount(AgentContent, {
       props: { agentData: sampleData, loading: false, error: null }
