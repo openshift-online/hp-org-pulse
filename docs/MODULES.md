@@ -15,13 +15,30 @@ This document covers how to create, develop, and contribute built-in modules for
 
 ## Module Structure
 
-The `bug-refinement` module owns the **Agentic Bug Refinement** sidebar section and view at
-`#/bug-refinement/main`. It tracks OCPBUGS and CNTRLPLANE issues with
-Chai's `refined-by-agent` label, separately from the solve queue. The Agentic
-Tools landing block contributes its home card through the shared `useModuleLink`
-helper, guarded by `moduleNav.isModuleAvailable('bug-refinement')`. It does not
-import refinement module code or read its storage. The module is enabled by
-default and uses its own Jira client, API scopes, refresh job, and cached snapshot.
+The `hp-automation` module is the **HP Automation** sidebar section. Its pages, in
+sidebar order, are **Bug Pipeline Guide** (`guide`), **Bug Pipeline** (`pipeline`, the
+default), **Solve** (`solve`), **Refine** (`refine`), **Backport** (`backport`),
+**PR Risk Assessment** (`risk`), and **CVE Triage** (`cve`), each at
+`#/hp-automation/<view>`. **Go Mod Automerge** is a disabled placeholder nav item with no
+view, so it shows greyed out and can't be clicked. Each page keeps its code in its own
+section folder: `client/<section>/`, `server/<section>/`, and
+`__tests__/{client,server}/<section>/`, where the sections are `pipeline` (both
+pipeline pages), `refine`, `solve`, `backport`, `risk`, and `cve`. `server/index.js`
+serves each section's API under `/api/modules/hp-automation/<section>/` and gives each
+refresh job a section prefix (for example `hp-automation:refine-refresh`). Core keeps one
+export hook per module, so the sections share one that runs each section's hook and
+names the section when one fails. Each section keeps the storage file, demo fixture, and
+API token scopes it had as a separate module (for example `bug-refinement/data.json`,
+`fixtures/bug-refinement/`, and `bug-refinement:read`), so existing data and tokens keep
+working. The module declares both the `jira` and `github` platform secrets. The Agentic
+Tools landing block adds home cards for Refine and Bug Pipeline through the shared
+`useModuleLink` helper, guarded by `moduleNav.isModuleAvailable('hp-automation')`.
+Integration tests are in `tests/integration/hp-automation-<section>.spec.js`, all tagged
+`@hp-automation`, so `make test-module MODULE=hp-automation` runs them together.
+
+The **Refine** page tracks OCPBUGS and CNTRLPLANE issues with
+Chai's `refined-by-agent` label, separately from the solve queue. It has its own Jira
+client, API scopes, refresh job, and cached snapshot.
 Below the Total refined, OCPBUGS, and CNTRLPLANE summary cards, the view builds
 selectable boxes from the distinct Jira component names in the
 loaded snapshot, sorted alphabetically, plus **All Teams** and a **No component**
@@ -46,24 +63,40 @@ timestamps sort chronologically. Missing values stay last in both directions.
 Sorting preserves the component, project, and search filters and does not change
 the snapshot or counters. Before a header is clicked, Jira's snapshot order is
 preserved.
-Its integration suite uses `@bug-refinement` and is included in module change
-detection. See [the snapshot format](DATA-FORMATS.md#agentic-bug-refinement--bug-refinementdatajson).
+See [the snapshot format](DATA-FORMATS.md#agentic-bug-refinement--bug-refinementdatajson).
 
-The `bug-pipeline` module owns the **Agentic Bug Pipeline** sidebar section and view at
-`#/bug-pipeline/main`, separate from the refinement section, and the Agentic Tools
-landing block adds its home card the same way, guarded by
-`moduleNav.isModuleAvailable('bug-pipeline')`. It declares `"requires": ["bug-refinement"]`
-and has no Jira client, refresh job, or storage of its own: `GET /api/modules/bug-pipeline/data`
-reads the refinement module's exported `bug-refinement/data.json` snapshot through
-`readFromStorage`, so the pipeline refreshes with Agentic Bug Refinement. Until that
-module fetches its first snapshot, the view says so. Because modules cannot import
-each other, the client keeps its own copies of the refinement view's component box,
-disposition, and sorting helpers, and of the server's backport label pattern; keep both
-copies in sync.
+The **Bug Pipeline Guide** and **Bug Pipeline** pages live in the `pipeline` section.
+The pipeline has no Jira client, refresh job, or storage of its own:
+`GET /api/modules/hp-automation/pipeline/data` reads the Refine snapshot,
+`bug-refinement/data.json`, through `readFromStorage`, so the pipeline refreshes with
+Refine. Until Refine fetches its first snapshot, the view says so. The pipeline section
+still keeps its own copies of the Refine view's component box, disposition, and sorting
+helpers, and of the server's backport label pattern, from when the two were separate
+modules; keep both copies in sync.
 The view shows how refined OCPBUGS issues move
 through Chai's solve and backport stages. It leaves out CNTRLPLANE issues and
 issues labeled `chai-backport`; backport clones count through their original
-issue's `backports`. Summary cards show refined bugs; the shares closed, sent for
+issue's `backports`. The guide view (`client/pipeline/views/GuideView.vue`) shows the **How the
+pipeline works** guide (`client/pipeline/components/PipelineGuide.vue`), which links the canonical self-driven bug backlog docs
+and diagrams refine → solve → backport, with risk assessment labeling the pull requests
+solve and backport open. Each box links its sources: the `jira-refine` skill in
+openshift-eng/ai-helpers; Chai's `jira_solve_pipeline.md` profile in
+openshift-eng/ship-help-bot (pinned to a commit); the `openshift_backport_pipeline.md`
+profile with the `backport` and `cherry-pick` skills it drives; and the
+`pr-risk-assessment` skill. The risk assessment box also
+names the risk assessment guideline, as plain text without a link. Hovering a box with a mouse,
+or focusing one of its links, glows that box, keeps the boxes one edge away lit, animates
+the edges between them toward the next stage, and fades the rest; with reduced motion
+the edges only change color. Below it,
+two cards each end in a **Copy prompt** button. **Onboard your component** shows the
+short `@chai-bot` request to onboard the component into the automated refine+solve
+pipeline, with `Component X` highlighted to replace, and notes that the Chai persona
+needs `extends: openshift_asdlc`. **Customize if you need to** sketches a short
+`AGENTS.md` that links `refine.md` and `risk-assessment.md`; its button copies a prompt,
+not shown on the page, that asks a coding agent in the repository to write both guides
+and add the **Automated Bug Pipeline guides** links to `AGENTS.md`. If the clipboard API
+is blocked, the buttons copy through a hidden textarea instead.
+The guide is static and fetches nothing. On the dashboard, summary cards show refined bugs; the shares closed, sent for
 human analysis, and waiting for information; the share sent to solve (`SOLVE`);
 the share of those that merged; and the share of their linked backports that
 merged. Each card states its count and denominator. The view reuses the
@@ -108,7 +141,7 @@ snapshot, so a bug is timed only when all of its clones are there.
 Selecting a box or band, by click or Enter/Space, narrows the table to its bugs until
 it is cleared or the component changes; the summary cards still count the whole
 component. **Show flows as a table** lists every band with its count, both shares, and median.
-`client/utils/decisions.js` builds and lays out the diagram without a charting library.
+`client/pipeline/utils/decisions.js` builds and lays out the diagram without a charting library.
 Each table row has a toggle that expands the bug's decision flow: lead times between
 decisions, a Mermaid flowchart with one node per decision labeled with who made it and
 when, its edges labeled with the time since the previous decision, and the same steps as
@@ -118,18 +151,15 @@ Chai adds with its matching assessment is not repeated. Each backport label open
 dotted lane with the clone's status transitions from the same snapshot, or the clone's
 current status when it is not in the snapshot. Without a `timeline`, the flow asks
 for a refresh.
-Its integration suite uses `@bug-pipeline`; change detection also runs it when the
-refinement server or fixture changes, since they define its data.
 
-The `risk-assessment` module owns the **Agentic Risk Assessment** sidebar section and
-view at `#/risk-assessment/main`. Chai labels the latest commit of a pull request with
+On the **PR Risk Assessment** page, Chai labels the latest commit of a pull request with
 exactly one of `chai-risk-assessment/low`, `chai-risk-assessment/moderate`, or
-`chai-risk-assessment/critical`. The module counts the PRs (any state) carrying each
+`chai-risk-assessment/critical`. The page counts the PRs (any state) carrying each
 label in a fixed list of OpenShift repositories, `REPOS` in
-`server/github/risk-labels.js`. A refresh is one GitHub GraphQL request with an aliased
+`server/risk/github/risk-labels.js`. A refresh is one GitHub GraphQL request with an aliased
 `search { issueCount }` per repository and level, made with the platform `GITHUB_TOKEN`
-secret. The module is enabled by default and has its own API scopes, refresh job, and
-cached snapshot. `GET /api/modules/risk-assessment/data` adds each repository's
+secret. It has its own API scopes, refresh job, and
+cached snapshot. `GET /api/modules/hp-automation/risk/data` adds each repository's
 assessed-PR total (the sum of its three counts) and each level's share, rounded to a
 whole percent, plus the same figures across all repositories. A repository without
 assessed PRs shows — for its shares.
@@ -139,8 +169,7 @@ with its total, each level's share and count, and a thin segmented bar of the sh
 Counts link to the matching GitHub pull request search, and an **All repositories**
 footer repeats the combined figures. Levels use the status colors (good, warning,
 critical) and always appear beside their names.
-Its integration suite uses `@risk-assessment` and is included in module change
-detection. See [the snapshot format](DATA-FORMATS.md#agentic-risk-assessment--datarisk-assessmentdatajson).
+See [the snapshot format](DATA-FORMATS.md#agentic-risk-assessment--datarisk-assessmentdatajson).
 
 ```text
 modules/your-module/
