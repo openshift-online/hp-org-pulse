@@ -99,9 +99,6 @@ describe('REPO_TEAMS', () => {
     // Edge
     expect(REPO_TEAM_BY_NAME['openshift/microshift']).toBe('edge-ecosystem')
     expect(REPO_TEAM_BY_NAME['openshift/lvm-operator']).toBe('edge-ecosystem')
-    // OAP
-    expect(REPO_TEAM_BY_NAME['openshift/cert-manager-operator']).toBe('edge-ecosystem')
-    expect(REPO_TEAM_BY_NAME['openshift/external-secrets-operator']).toBe('edge-ecosystem')
     // Metal Platform
     expect(REPO_TEAM_BY_NAME['openshift/baremetal-operator']).toBe('edge-ecosystem')
     expect(REPO_TEAM_BY_NAME['openshift/ironic-image']).toBe('edge-ecosystem')
@@ -109,6 +106,27 @@ describe('REPO_TEAMS', () => {
     expect(REPO_TEAM_BY_NAME['openshift/multiarch-tuning-operator']).toBe('edge-ecosystem')
     // CID
     expect(REPO_TEAM_BY_NAME['openshift/mirror-gui']).toBe('edge-ecosystem')
+  })
+
+  it('assigns all openshift OAPE repositories exclusively to OAPE', () => {
+    const repos = [
+      'must-gather-operator', 'must-gather', 'must-gather-clean',
+      'cert-manager-operator', 'jetstack-cert-manager', 'cert-manager-trust-manager',
+      'cert-manager-istio-csr', 'cert-manager-approver-policy', 'cert-manager-operator-release',
+      'external-secrets-operator', 'external-secrets', 'external-secrets-bitwarden-sdk-server',
+      'external-secrets-operator-release', 'intelliaide-lightspeed-skills',
+      'ocp-release-operator-sdk', 'ansible-operator-plugins',
+      'secrets-store-csi-driver-operator', 'secrets-store-csi-driver',
+      'zero-trust-workload-identity-manager', 'zero-trust-workload-identity-manager-release',
+      'spiffe-spire-controller-manager', 'spiffe-spiffe-csi', 'spiffe-spiffe-helper',
+      'spiffe-spire', 'spiffe-go-spiffe', 'ocp-secrets-management-console'
+    ].map(name => `openshift/${name}`)
+
+    expect(TEAM_REPOS.oape).toHaveLength(26)
+    for (const repo of repos) {
+      expect(REPO_TEAMS.filter(entry => entry.repo === repo)).toEqual([{ repo, team: 'oape' }])
+      expect(REPO_TEAM_BY_NAME[repo]).toBe('oape')
+    }
   })
 
   it('wires the repos touched by cross-repo bot bumps to their owning teams', () => {
@@ -124,14 +142,12 @@ describe('REPO_TEAMS', () => {
     expect(REPO_TEAM_BY_NAME['openshift/builder']).toBe('builds')
   })
 
-  it('does not double-claim repos already assigned to other teams', () => {
-    // These repos belong to the Edge & Ecosystem pillar in the org data but
-    // are already wired to a different team in this module.
-    expect(REPO_TEAM_BY_NAME['openshift/secrets-store-csi-driver']).toBe('storage')
+  it('maps repositories to their configured teams', () => {
+    expect(REPO_TEAM_BY_NAME['openshift/secrets-store-csi-driver']).toBe('oape')
     expect(REPO_TEAM_BY_NAME['openshift/oc-mirror']).toBe('cluster-lifecycle')
     expect(REPO_TEAM_BY_NAME['openshift/installer']).toBe('installer')
     expect(REPO_TEAM_BY_NAME['openshift/hypershift']).toBe('hypershift')
-    expect(REPO_TEAM_BY_NAME['openshift/must-gather']).toBe('support')
+    expect(REPO_TEAM_BY_NAME['openshift/must-gather']).toBe('oape')
   })
 
   it('excludes the SRE-platform and lightspeed repos', () => {

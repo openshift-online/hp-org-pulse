@@ -203,5 +203,8 @@ describe('fetchAgentData', () => {
     expect(requestedJql).toContain('labels = "issue-for-agent"')
     expect(requestedJql).toContain('labels != "chai-backport"')
     expect(requestedJql).toContain('"ROSAENG"')
+    for (const project of ['OAPE', 'CM', 'SPIRE', 'SSCSI', 'ESO', 'MG', 'SMC']) {
+      expect(requestedJql).toContain(`"${project}"`)
+    }
   })
 })

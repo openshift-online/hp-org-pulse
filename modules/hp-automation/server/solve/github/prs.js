@@ -95,7 +95,6 @@ const TEAM_REPOS = {
     'cluster-kube-apiserver-operator',
     'cluster-openshift-apiserver-operator',
     'cluster-authentication-operator',
-    'ocp-release-operator-sdk',
     'cluster-config-operator',
     'oauth-apiserver',
     'oauth-server',
@@ -130,7 +129,6 @@ const TEAM_REPOS = {
   storage: [
     'local-storage-operator',
     'csi-operator',
-    'secrets-store-csi-driver',
     'csi-external-snapshotter',
     'csi-driver-smb',
     'cluster-image-registry-operator',
@@ -176,8 +174,8 @@ const TEAM_REPOS = {
     'cluster-api-provider-vsphere'
   ],
   console: ['console', 'console-operator'],
-  olm: ['operator-framework-olm', 'ansible-operator-plugins', 'kueue-operator'],
-  support: ['insights-operator', 'must-gather', 'insights-runtime-extractor'],
+  olm: ['operator-framework-olm', 'kueue-operator'],
+  support: ['insights-operator', 'insights-runtime-extractor'],
   monitoring: [
     'monitoring-plugin',
     'prometheus-alertmanager',
@@ -189,17 +187,35 @@ const TEAM_REPOS = {
     'configmap-reload'
   ],
   builds: ['builder'],
+  oape: [
+    // must-gather
+    'must-gather-operator', 'must-gather', 'must-gather-clean',
+    // cert-manager
+    'cert-manager-operator', 'jetstack-cert-manager',
+    'cert-manager-trust-manager', 'cert-manager-istio-csr',
+    'cert-manager-approver-policy', 'cert-manager-operator-release',
+    // External Secrets Operator
+    'external-secrets-operator', 'external-secrets',
+    'external-secrets-bitwarden-sdk-server', 'external-secrets-operator-release',
+    // IntelliAide
+    'intelliaide-lightspeed-skills',
+    // Operator SDK
+    'ocp-release-operator-sdk', 'ansible-operator-plugins',
+    // Secrets Store CSI
+    'secrets-store-csi-driver-operator', 'secrets-store-csi-driver',
+    // Zero Trust Workload Identity Manager
+    'zero-trust-workload-identity-manager', 'zero-trust-workload-identity-manager-release',
+    'spiffe-spire-controller-manager', 'spiffe-spiffe-csi',
+    'spiffe-spiffe-helper', 'spiffe-spire', 'spiffe-go-spiffe',
+    // Secrets Management Console
+    'ocp-secrets-management-console'
+  ],
   // Edge & Ecosystem pillar — derived from gitlab.cee.redhat.com/hybrid-platforms/org.
   // Repos already wired to another team (oc-mirror→cluster-lifecycle,
   // installer→installer, hypershift→hypershift, etc.) are intentionally excluded.
-  // Non-openshift/ orgs (openshift-eng, openshift-metal3, okd-project) are excluded
-  // because the bot only targets openshift/ repositories.
   'edge-ecosystem': [
     // Edge
     'lvm-operator', 'microshift',
-    // Application Platform (OAP)
-    'cert-manager-operator', 'secrets-store-csi-driver-operator',
-    'spire-operator', 'external-secrets-operator', 'must-gather-operator',
     // CID
     'mirror-gui',
     // Multi Architecture
